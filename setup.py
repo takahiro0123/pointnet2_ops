@@ -14,7 +14,7 @@ _ext_headers = glob.glob(osp.join(_ext_src_root, "include", "*"))
 
 exec(open(osp.join("pointnet2_ops", "_version.py")).read())
 
-os.environ["TORCH_CUDA_ARCH_LIST"] = "3.7+PTX;5.0;6.0;6.1;6.2;7.0;7.5"
+os.environ["TORCH_CUDA_ARCH_LIST"] = "3.7+PTX;5.0;6.0;6.1;6.2;7.0;7.5;9.0"
 
 nvcc_args = [
     "-O3",
@@ -24,7 +24,8 @@ nvcc_args = [
     '-gencode', 'arch=compute_60,code=sm_60',
     '-gencode', 'arch=compute_61,code=sm_61',
     '-gencode', 'arch=compute_70,code=sm_70',
-    '-gencode', 'arch=compute_75,code=sm_75'
+    '-gencode', 'arch=compute_75,code=sm_75',
+    '-gencode', 'arch=compute_90,code=sm_90',
 ]
 
 setup(
