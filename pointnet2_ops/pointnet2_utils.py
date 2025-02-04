@@ -33,7 +33,7 @@ except ImportError:
 
 class FurthestPointSampling(Function):
     @staticmethod
-    def forward(ctx, xyz, npoint):
+    def forward(ctx, xyz, class_labels, npoint):
         # type: (Any, torch.Tensor, int) -> torch.Tensor
         r"""
         Uses iterative furthest point sampling to select a set of npoint features that have the largest
@@ -51,9 +51,8 @@ class FurthestPointSampling(Function):
         torch.Tensor
             (B, npoint) tensor containing the set
         """
-        out = _ext.furthest_point_sampling(xyz, npoint)
-
-        ctx.mark_non_differentiable(out)
+        out = _ext.furthest_point_sampling(xyz, class_labels, npoint)
+        ctx.mark_non_differentiable(out[0], out[1])
 
         return out
 
