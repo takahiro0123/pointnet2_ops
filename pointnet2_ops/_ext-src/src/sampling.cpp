@@ -17,18 +17,18 @@ at::Tensor gather_points_grad_kernel_wrapper(
     const at::Tensor grad_out,
     const at::Tensor idx);
 
-at::Tensor furthest_point_sampling_kernel_wrapper(
+std::tuple<at::Tensor, at::Tensor> furthest_point_sampling_kernel_wrapper(
     int b,
     int n,
     int m,
-    const at::Tensor points);
+    const at::Tensor points,
+    const at::Tensor class_labels);
 
 at::Tensor gather_points(at::Tensor points, at::Tensor idx) {
   CHECK_INPUT(points);
   CHECK_INPUT(idx);
   CHECK_IS_INT(idx);
   // TODO check types for points?
-
 
   return gather_points_kernel_wrapper(
       points.size(0),
@@ -57,11 +57,13 @@ at::Tensor gather_points_grad(
       idx);
 }
 
-at::Tensor furthest_point_sampling(at::Tensor points, const int nsamples) {
+std::tuple<at::Tensor, at::Tensor> furthest_point_sampling(at::Tensor points, at::Tensor class_labels, const int nsamples) {
   CHECK_INPUT(points);
+  CHECK_INPUT(class_labels);
   return furthest_point_sampling_kernel_wrapper(
       points.size(0),
       points.size(1),
       nsamples,
-      points);
+      points,
+      class_labels);
 }
