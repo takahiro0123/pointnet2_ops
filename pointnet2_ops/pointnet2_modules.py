@@ -27,7 +27,7 @@ class _PointnetSAModuleBase(nn.Module):
         self.mlps = None
 
     def forward(
-        self, xyz: torch.Tensor, features: Optional[torch.Tensor]
+        self, xyz: torch.Tensor, class_labels: torch.Tensor, features: Optional[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         r"""
         Parameters
@@ -48,16 +48,18 @@ class _PointnetSAModuleBase(nn.Module):
         new_features_list = []
 
         xyz_flipped = xyz.transpose(1, 2).contiguous()
-        new_xyz = (
-            pointnet2_utils.gather_operation(
-                xyz_flipped, pointnet2_utils.furthest_point_sample(xyz, self.npoint)
+        if self.npoint is not None:
+            ext_xyz, new_class_labels = pointnet2_utils.furthest_point_sample(xyz, class_labels, self.npoint)
+            new_xyz = (
+                pointnet2_utils.gather_operation(
+                    xyz_flipped, ext_xyz
+                )
+                .transpose(1, 2)
+                .contiguous()
             )
-            .transpose(1, 2)
-            .contiguous()
-            if self.npoint is not None
-            else None
-        )
-
+        else:
+            new_xyz = None
+            new_class_labels = class_labels
         for i in range(len(self.groupers)):
             new_features = self.groupers[i](
                 xyz, new_xyz, features
@@ -71,7 +73,7 @@ class _PointnetSAModuleBase(nn.Module):
 
             new_features_list.append(new_features)
 
-        return new_xyz, torch.cat(new_features_list, dim=1)
+        return new_xyz, new_class_labels, torch.cat(new_features_list, dim=1)
 
 
 class PointnetSAModuleMSG(_PointnetSAModuleBase):
